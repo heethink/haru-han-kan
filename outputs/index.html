@@ -3,259 +3,92 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f7f8f4">
-  <title>오늘의 할 일</title>
+  <meta name="theme-color" content="#f8f7f4">
+  <title>한 줄 메모 — 오늘의 생각을 가볍게</title>
   <style>
-    :root {
-      color-scheme: light;
-      --ink: #20251f;
-      --muted: #858c83;
-      --line: #e9ece5;
-      --paper: #fff;
-      --canvas: #f7f8f4;
-      --green: #527d5d;
-      --green-dark: #3d6247;
-      --green-pale: #edf4ed;
-      --orange: #e7a56c;
-      --shadow: 0 18px 50px rgba(38, 52, 38, .055);
-      font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--canvas); }
-    button, input, select { font: inherit; }
-    button { color: inherit; }
-    .app { width: min(1080px, calc(100% - 48px)); margin: 0 auto; padding: 36px 0 60px; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom: 42px; }
-    .brand { display:flex; align-items:center; gap:11px; font-size:17px; font-weight:750; letter-spacing:-.04em; }
-    .brand-mark { display:grid; place-items:center; width:34px; height:34px; color:#fff; background:var(--green); border-radius:11px; }
-    .brand-mark svg { width:19px; }
-    .top-date { color:var(--muted); font-size:13px; }
-    .layout { display:grid; grid-template-columns: 280px minmax(0, 1fr); gap:28px; align-items:start; }
-    .welcome { padding: 12px 4px 24px; }
-    .eyebrow { display:inline-flex; align-items:center; gap:8px; color:var(--green); background:var(--green-pale); border-radius:999px; padding:8px 12px; font-size:12px; font-weight:700; }
-    .eyebrow-dot { width:7px; height:7px; border-radius:50%; background:var(--green); }
-    h1 { margin:21px 0 9px; font-size:34px; line-height:1.24; letter-spacing:-.065em; }
-    .welcome p { margin:0; color:var(--muted); font-size:14px; line-height:1.7; }
-    .progress-card { margin-top:28px; padding:20px; background:var(--paper); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); }
-    .progress-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:17px; }
-    .progress-head strong { font-size:14px; }
-    .progress-head span { color:var(--green); font-size:13px; font-weight:750; }
-    .progress-track { height:8px; overflow:hidden; background:#eef0eb; border-radius:20px; }
-    .progress-fill { width:0; height:100%; background:linear-gradient(90deg, #79a580, var(--green)); border-radius:inherit; transition:width .25s ease; }
-    .progress-caption { margin-top:11px; color:var(--muted); font-size:12px; }
-    .side-note { display:flex; gap:12px; margin:20px 3px 0; color:#747d72; font-size:12px; line-height:1.65; }
-    .side-note .spark { color:var(--orange); font-size:16px; }
-    .main-card { overflow:hidden; background:var(--paper); border:1px solid var(--line); border-radius:22px; box-shadow:var(--shadow); }
-    .card-head { padding:25px 27px 20px; border-bottom:1px solid var(--line); }
-    .head-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    h2 { margin:0; font-size:20px; letter-spacing:-.045em; }
-    .count-pill { padding:6px 10px; color:var(--green); background:var(--green-pale); border-radius:999px; font-size:12px; font-weight:700; }
-    .filters { display:flex; gap:7px; margin-top:20px; }
-    .filter { padding:8px 12px; color:var(--muted); background:transparent; border:0; border-radius:9px; cursor:pointer; font-size:12px; font-weight:650; transition:.18s; }
-    .filter:hover { color:var(--ink); background:#f5f6f2; }
-    .filter[aria-pressed="true"] { color:var(--green-dark); background:var(--green-pale); }
-    .task-list { min-height:250px; padding:7px 27px 8px; }
-    .task-row { display:grid; grid-template-columns:22px minmax(0, 1fr) auto 30px; gap:13px; align-items:center; min-height:68px; border-bottom:1px solid #f0f1ed; animation:appear .2s ease-out; }
-    .task-row:last-child { border-bottom:0; }
-    @keyframes appear { from { opacity:0; transform:translateY(4px) } to { opacity:1; transform:none } }
-    .check { appearance:none; width:20px; height:20px; margin:0; border:1.5px solid #d8ded5; border-radius:7px; cursor:pointer; position:relative; transition:.16s; }
-    .check:hover { border-color:var(--green); }
-    .check:checked { border-color:var(--green); background:var(--green); }
-    .check:checked::after { content:""; position:absolute; left:5px; top:2px; width:6px; height:10px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
-    .task-title { overflow-wrap:anywhere; font-size:14px; font-weight:570; line-height:1.45; }
-    .task-row.done .task-title { color:#a2a89f; text-decoration:line-through; }
-    .task-meta { display:flex; align-items:center; gap:7px; }
-    .tag { padding:5px 9px; color:#798078; background:#f3f4f1; border-radius:7px; font-size:11px; white-space:nowrap; }
-    .tag.work { color:#5877a3; background:#eef3fa; }
-    .tag.life { color:#ad7955; background:#fbf2ea; }
-    .tag.study { color:#8671a6; background:#f4f0f8; }
-    .delete { display:grid; place-items:center; width:30px; height:30px; color:#a4aaa1; background:transparent; border:0; border-radius:8px; cursor:pointer; opacity:.45; }
-    .delete:hover, .delete:focus-visible { color:#ba615a; background:#fbefee; opacity:1; }
-    .delete svg { width:16px; }
-    .empty { display:flex; min-height:250px; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:var(--muted); }
-    .empty-icon { display:grid; place-items:center; width:52px; height:52px; margin-bottom:13px; color:var(--green); background:var(--green-pale); border-radius:17px; }
-    .empty-icon svg { width:23px; }
-    .empty strong { color:#555e54; font-size:14px; }
-    .empty span { margin-top:6px; font-size:12px; }
-    .add-area { padding:18px 27px 23px; background:#fcfcfa; border-top:1px solid var(--line); }
-    .add-form { display:flex; gap:9px; }
-    .task-input { min-width:0; flex:1; height:46px; padding:0 14px; color:var(--ink); background:#fff; border:1px solid #e5e9e1; border-radius:11px; outline:none; font-size:13px; transition:.18s; }
-    .task-input::placeholder { color:#abb1a8; }
-    .task-input:focus { border-color:#91b295; box-shadow:0 0 0 3px rgba(82,125,93,.1); }
-    .category-select { width:102px; height:46px; padding:0 10px; color:#747d72; background:#fff; border:1px solid #e5e9e1; border-radius:11px; outline:none; font-size:12px; }
-    .add-button { display:flex; align-items:center; justify-content:center; gap:7px; min-width:88px; height:46px; padding:0 14px; color:#fff; background:var(--green); border:0; border-radius:11px; cursor:pointer; font-size:13px; font-weight:700; transition:.18s; }
-    .add-button:hover { background:var(--green-dark); transform:translateY(-1px); }
-    .add-button svg { width:16px; }
-    .hint { margin:10px 1px 0; color:#a1a79f; font-size:11px; }
-    .footer { display:flex; justify-content:space-between; margin-top:15px; color:#9ba198; font-size:11px; }
-    .footer button { padding:0; color:#9ba198; background:none; border:0; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
-    .footer button:hover { color:#ba615a; }
-    :focus-visible { outline:3px solid rgba(82,125,93,.32); outline-offset:2px; }
-    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-    @media (max-width:740px) {
-      .app { width:min(560px, calc(100% - 30px)); padding-top:21px; }
-      .topbar { margin-bottom:25px; }
-      .layout { grid-template-columns:1fr; gap:18px; }
-      .welcome { padding:0 2px 0; }
-      h1 { margin-top:15px; font-size:29px; }
-      .progress-card { margin-top:17px; padding:16px 18px; }
-      .side-note { display:none; }
-      .main-card { border-radius:18px; }
-      .card-head { padding:21px 19px 16px; }
-      .task-list { padding:5px 19px; }
-      .task-row { grid-template-columns:22px minmax(0,1fr) auto 28px; gap:9px; }
-      .add-area { padding:15px 18px 19px; }
-    }
-    @media (max-width:430px) {
-      .top-date { font-size:11px; }
-      .task-row { grid-template-columns:22px minmax(0,1fr) 28px; }
-      .task-meta { display:none; }
-      .category-select { width:87px; }
-      .add-button { min-width:48px; padding:0 13px; }
-      .add-button span { display:none; }
-      .filters { gap:2px; }
-      .filter { padding:8px 10px; }
-    }
-    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; } }
+    :root{color-scheme:light;--ink:#282a27;--muted:#85877f;--line:#e9e7e1;--paper:#fff;--canvas:#f8f7f4;--green:#557a60;--green-dark:#3e6148;--pale:#edf3ed;--shadow:0 18px 55px rgba(48,49,41,.06);font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);background:var(--canvas)}button,input{font:inherit}button{color:inherit}.app{width:min(960px,calc(100% - 40px));margin:0 auto;padding:34px 0 60px}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:54px}.brand{display:flex;align-items:center;gap:11px;font-size:17px;font-weight:760;letter-spacing:-.04em}.brand-mark{display:grid;place-items:center;width:36px;height:36px;color:#fff;background:var(--green);border-radius:12px}.brand-mark svg{width:19px}.top-date{color:var(--muted);font-size:13px}.hero{text-align:center;margin-bottom:34px}.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--green);background:var(--pale);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700}.dot{width:7px;height:7px;border-radius:50%;background:var(--green)}h1{margin:18px 0 9px;font-size:36px;line-height:1.2;letter-spacing:-.065em}.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.7}.composer{max-width:690px;margin:0 auto 46px;padding:9px;background:var(--paper);border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}.compose-row{display:flex;gap:8px}.memo-input{min-width:0;flex:1;height:50px;padding:0 14px;color:var(--ink);background:transparent;border:0;outline:none;font-size:15px}.memo-input::placeholder{color:#a3a49d}.memo-input:focus-visible{outline:2px solid #9bb29d;outline-offset:-2px;border-radius:10px}.add{display:flex;align-items:center;justify-content:center;gap:8px;min-width:112px;height:50px;padding:0 16px;color:#fff;background:var(--green);border:0;border-radius:11px;cursor:pointer;font-weight:700;font-size:13px;transition:.18s}.add:hover{background:var(--green-dark);transform:translateY(-1px)}.add svg{width:16px}.compose-foot{display:flex;justify-content:space-between;padding:7px 13px 2px;color:#a0a198;font-size:11px}.compose-foot .count{font-variant-numeric:tabular-nums}.section-head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:16px}.section-title{display:flex;align-items:baseline;gap:10px}.section-title h2{margin:0;font-size:18px;letter-spacing:-.04em}.total{color:var(--muted);font-size:12px}.tools{display:flex;align-items:center;gap:8px}.search-wrap{position:relative}.search-wrap svg{position:absolute;left:12px;top:50%;width:15px;transform:translateY(-50%);color:#9a9b93;pointer-events:none}.search{width:190px;height:38px;padding:0 12px 0 35px;background:var(--paper);border:1px solid var(--line);border-radius:10px;outline:none;font-size:12px}.search:focus{border-color:#91ad95;box-shadow:0 0 0 3px rgba(85,122,96,.1)}.clear-all{height:38px;padding:0 12px;color:#888a82;background:transparent;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:12px}.clear-all:hover{color:#a44f48;background:#fff8f7}.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.note{position:relative;min-height:116px;padding:19px 20px 16px;background:var(--paper);border:1px solid var(--line);border-radius:15px;box-shadow:0 5px 18px rgba(40,42,39,.025);animation:appear .2s ease-out}.note::before{position:absolute;top:18px;left:0;width:3px;height:22px;background:#d6e2d5;border-radius:0 4px 4px 0;content:""}.note-text{margin:0 0 20px;font-size:15px;line-height:1.6;overflow-wrap:anywhere;white-space:pre-wrap}.note-meta{display:flex;align-items:center;justify-content:space-between;color:#a0a198;font-size:11px}.delete{display:grid;place-items:center;width:30px;height:30px;margin:-8px -8px -8px 0;color:#a0a198;background:transparent;border:0;border-radius:8px;cursor:pointer;opacity:.65}.delete:hover,.delete:focus-visible{color:#ae5a52;background:#fbefee;opacity:1}.delete svg{width:16px}.empty{grid-column:1/-1;display:flex;min-height:230px;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--muted);background:rgba(255,255,255,.55);border:1px dashed #deded6;border-radius:16px}.empty-icon{display:grid;place-items:center;width:50px;height:50px;margin-bottom:14px;color:var(--green);background:var(--pale);border-radius:16px}.empty-icon svg{width:22px}.empty strong{color:#565950;font-size:14px}.empty span{margin-top:7px;font-size:12px}.footer{display:flex;justify-content:center;gap:7px;margin-top:25px;color:#a1a198;font-size:11px}.footer svg{width:13px;color:var(--green)}:focus-visible{outline:3px solid rgba(85,122,96,.32);outline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@keyframes appear{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}@media(max-width:640px){.app{width:min(520px,calc(100% - 30px));padding-top:22px}.topbar{margin-bottom:39px}.hero{margin-bottom:25px}h1{font-size:30px}.composer{margin-bottom:34px}.section-head{align-items:flex-start;flex-direction:column;gap:12px}.tools{width:100%}.search-wrap{flex:1}.search{width:100%}.notes{grid-template-columns:1fr;gap:9px}.note{min-height:100px}.clear-all{white-space:nowrap}}@media(max-width:380px){.top-date{font-size:11px}.add{min-width:50px;padding:0 13px}.add span{display:none}.memo-input{font-size:14px}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
   </style>
 </head>
 <body>
   <div class="app">
     <header class="topbar">
-      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.3 4.3L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>하루 한 칸</div>
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 4.75h7l4 4v10.5H7zM14 5v4h4M10 13h5M10 16h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>한 줄 메모</div>
       <time class="top-date" id="todayDate"></time>
     </header>
-    <div class="layout">
-      <aside>
-        <section class="welcome" aria-labelledby="welcomeTitle">
-          <span class="eyebrow"><span class="eyebrow-dot"></span>나의 오늘</span>
-          <h1 id="welcomeTitle">작은 한 걸음이<br>하루를 바꿔요.</h1>
-          <p>오늘 할 일을 적고, 하나씩 체크해 보세요.<br>천천히 해도 괜찮아요.</p>
-        </section>
-        <section class="progress-card" aria-label="오늘의 진행 상황">
-          <div class="progress-head"><strong>오늘의 진행률</strong><span id="progressText">0%</span></div>
-          <div class="progress-track" role="progressbar" aria-label="할 일 완료율" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
-          <div class="progress-caption" id="progressCaption">할 일을 추가하고 시작해 보세요.</div>
-        </section>
-        <div class="side-note"><span class="spark" aria-hidden="true">✳</span><span>기억할 일을 적어 두면<br>마음이 조금 더 가벼워져요.</span></div>
-      </aside>
-      <main class="main-card" aria-labelledby="listTitle">
-        <div class="card-head">
-          <div class="head-row"><h2 id="listTitle">오늘 할 일</h2><span class="count-pill" id="countPill">0개 남음</span></div>
-          <nav class="filters" aria-label="할 일 필터">
-            <button class="filter" type="button" data-filter="all" aria-pressed="true">전체</button>
-            <button class="filter" type="button" data-filter="active" aria-pressed="false">할 일</button>
-            <button class="filter" type="button" data-filter="done" aria-pressed="false">완료</button>
-          </nav>
+    <main>
+      <section class="hero" aria-labelledby="pageTitle">
+        <span class="eyebrow"><span class="dot"></span>생각을 가볍게 기록해요</span>
+        <h1 id="pageTitle">떠오른 생각을<br>한 줄로 남겨보세요.</h1>
+        <p>좋았던 일도, 기억할 일도 짧게 적어두면 충분해요.</p>
+      </section>
+      <form class="composer" id="memoForm">
+        <label class="sr-only" for="memoInput">새 메모</label>
+        <div class="compose-row">
+          <input class="memo-input" id="memoInput" maxlength="140" placeholder="지금 떠오른 생각은 무엇인가요?" autocomplete="off" required>
+          <button class="add" type="submit"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>메모 남기기</span></button>
         </div>
-        <div class="task-list" id="taskList" aria-live="polite"></div>
-        <div class="add-area">
-          <form class="add-form" id="addForm">
-            <label class="sr-only" for="taskInput">새 할 일</label>
-            <input class="task-input" id="taskInput" maxlength="120" placeholder="새로운 할 일을 적어보세요" autocomplete="off" required>
-            <label class="sr-only" for="categorySelect">분류</label>
-            <select class="category-select" id="categorySelect">
-              <option value="일상">일상</option><option value="업무">업무</option><option value="공부">공부</option>
-            </select>
-            <button class="add-button" type="submit"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>추가하기</span></button>
-          </form>
-          <p class="hint">Enter 키를 눌러도 할 일을 추가할 수 있어요.</p>
+        <div class="compose-foot"><span>Enter 키로 바로 저장할 수 있어요</span><span class="count" id="charCount">0 / 140</span></div>
+      </form>
+      <section aria-labelledby="notesTitle">
+        <div class="section-head">
+          <div class="section-title"><h2 id="notesTitle">내 메모</h2><span class="total" id="totalCount">0개</span></div>
+          <div class="tools">
+            <label class="sr-only" for="searchInput">메모 검색</label>
+            <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input class="search" id="searchInput" type="search" placeholder="메모 검색"></div>
+            <button class="clear-all" id="clearAll" type="button">모두 지우기</button>
+          </div>
         </div>
-      </main>
-    </div>
-    <div class="footer"><span>내 브라우저에 자동으로 저장돼요</span><button type="button" id="clearDone">완료한 일 비우기</button></div>
+        <div class="notes" id="notesList" aria-live="polite"></div>
+      </section>
+    </main>
+    <footer class="footer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 5 6v5c0 4.8 3 8.2 7 10 4-1.8 7-5.2 7-10V6l-7-3Z" stroke="currentColor" stroke-width="1.6"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>메모는 지금 사용하는 브라우저에 자동 저장돼요</span></footer>
   </div>
+  <div class="sr-only" id="announcement" aria-live="polite" aria-atomic="true"></div>
   <script>
     (() => {
-      const STORAGE_KEY = 'haru-han-kan-tasks-v1';
+      const KEY = 'one-line-memos-v1';
       const $ = (selector) => document.querySelector(selector);
-      const list = $('#taskList');
-      const input = $('#taskInput');
-      const filters = [...document.querySelectorAll('.filter')];
-      const iconCheck = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.3 4.3L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      const iconTrash = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      let tasks = loadTasks();
-      let currentFilter = 'all';
-
-      function loadTasks() {
-        try {
-          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-          return Array.isArray(saved) ? saved.filter(t => t && typeof t.title === 'string' && typeof t.done === 'boolean') : [];
-        } catch { return []; }
+      const input = $('#memoInput');
+      const list = $('#notesList');
+      const trashIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      let notes = load();
+      function load() {
+        try { const value = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(value) ? value.filter(note => note && typeof note.text === 'string' && typeof note.createdAt === 'string') : []; }
+        catch { return []; }
       }
-      function save() {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
-        catch { announce('저장 공간이 부족해요.'); }
-      }
-      function announce(message) {
-        const live = $('#announcement');
-        live.textContent = '';
-        requestAnimationFrame(() => { live.textContent = message; });
-      }
-      function safeText(value) {
-        const span = document.createElement('span');
-        span.textContent = value;
-        return span.innerHTML;
-      }
+      function save() { try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch { announce('저장 공간이 부족해요.'); } }
+      function announce(message) { const live = $('#announcement'); live.textContent = ''; requestAnimationFrame(() => { live.textContent = message; }); }
+      function escapeHTML(value) { const el = document.createElement('span'); el.textContent = value; return el.innerHTML; }
+      function formatDate(iso) { const date = new Date(iso); if (Number.isNaN(date.getTime())) return ''; return new Intl.DateTimeFormat('ko-KR', { month:'long', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false }).format(date); }
       function render() {
-        const remaining = tasks.filter(t => !t.done).length;
-        const completed = tasks.length - remaining;
-        const percent = tasks.length ? Math.round(completed / tasks.length * 100) : 0;
-        $('#countPill').textContent = `${remaining}개 남음`;
-        $('#progressText').textContent = `${percent}%`;
-        $('#progressFill').style.width = `${percent}%`;
-        $('#progressBar').setAttribute('aria-valuenow', String(percent));
-        $('#progressCaption').textContent = tasks.length ? `${completed}개 완료 · ${remaining}개 남았어요` : '할 일을 추가하고 시작해 보세요.';
-        const visible = tasks.filter(task => currentFilter === 'all' || (currentFilter === 'active' ? !task.done : task.done));
+        const query = $('#searchInput').value.trim().toLocaleLowerCase('ko-KR');
+        const visible = notes.filter(note => note.text.toLocaleLowerCase('ko-KR').includes(query));
+        $('#totalCount').textContent = `${notes.length}개`;
         if (!visible.length) {
-          const allEmpty = tasks.length === 0;
-          list.innerHTML = `<div class="empty"><span class="empty-icon">${iconCheck}</span><strong>${allEmpty ? '오늘은 무엇을 해볼까요?' : currentFilter === 'active' ? '남은 할 일이 없어요!' : '아직 완료한 일이 없어요.'}</strong><span>${allEmpty ? '아래에 첫 번째 할 일을 적어보세요.' : '다른 탭에서 목록을 확인해 보세요.'}</span></div>`;
+          const isSearching = Boolean(query);
+          list.innerHTML = `<div class="empty"><span class="empty-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4.75h7l4 4v10.5H7zM14 5v4h4M10 13h5M10 16h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><strong>${isSearching ? '검색 결과가 없어요.' : '아직 메모가 없어요.'}</strong><span>${isSearching ? '다른 단어로 검색해 보세요.' : '위에 첫 번째 한 줄을 남겨보세요.'}</span></div>`;
           return;
         }
-        list.innerHTML = visible.map(task => `<article class="task-row ${task.done ? 'done' : ''}" data-id="${safeText(task.id)}">
-          <input class="check" type="checkbox" aria-label="${task.done ? '완료 취소' : '완료 표시'}: ${safeText(task.title)}" ${task.done ? 'checked' : ''}>
-          <span class="task-title">${safeText(task.title)}</span>
-          <div class="task-meta"><span class="tag ${task.category === '업무' ? 'work' : task.category === '공부' ? 'study' : 'life'}">${safeText(task.category || '일상')}</span></div>
-          <button class="delete" type="button" aria-label="삭제: ${safeText(task.title)}">${iconTrash}</button>
-        </article>`).join('');
+        list.innerHTML = visible.map(note => `<article class="note" data-id="${escapeHTML(note.id)}"><p class="note-text">${escapeHTML(note.text)}</p><div class="note-meta"><time datetime="${escapeHTML(note.createdAt)}">${escapeHTML(formatDate(note.createdAt))}</time><button class="delete" type="button" aria-label="메모 삭제: ${escapeHTML(note.text)}">${trashIcon}</button></div></article>`).join('');
       }
-      $('#addForm').addEventListener('submit', event => {
-        event.preventDefault();
-        const title = input.value.trim();
-        if (!title) { input.focus(); return; }
-        tasks.unshift({ id: (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`), title, category: $('#categorySelect').value, done: false });
-        save(); render(); input.value = ''; input.focus(); announce('할 일을 추가했어요.');
+      $('#memoForm').addEventListener('submit', event => {
+        event.preventDefault(); const text = input.value.trim(); if (!text) { input.focus(); return; }
+        notes.unshift({ id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`, text, createdAt: new Date().toISOString() });
+        save(); input.value = ''; $('#charCount').textContent = '0 / 140'; $('#searchInput').value = ''; render(); input.focus(); announce('메모를 저장했어요.');
       });
-      list.addEventListener('change', event => {
-        if (!event.target.matches('.check')) return;
-        const row = event.target.closest('[data-id]');
-        const task = tasks.find(item => item.id === row.dataset.id);
-        if (task) { task.done = event.target.checked; save(); render(); announce(task.done ? '완료로 표시했어요.' : '완료 표시를 취소했어요.'); }
-      });
+      input.addEventListener('input', () => { $('#charCount').textContent = `${input.value.length} / 140`; });
+      $('#searchInput').addEventListener('input', render);
       list.addEventListener('click', event => {
-        const button = event.target.closest('.delete');
-        if (!button) return;
-        const row = button.closest('[data-id]');
-        const task = tasks.find(item => item.id === row.dataset.id);
-        tasks = tasks.filter(item => item.id !== row.dataset.id);
-        save(); render(); announce(`할 일을 삭제했어요${task ? `: ${task.title}` : ''}.`);
+        const button = event.target.closest('.delete'); if (!button) return;
+        const note = button.closest('[data-id]'); notes = notes.filter(item => item.id !== note.dataset.id); save(); render(); announce('메모를 삭제했어요.');
       });
-      filters.forEach(button => button.addEventListener('click', () => {
-        currentFilter = button.dataset.filter;
-        filters.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-        render();
-      }));
-      $('#clearDone').addEventListener('click', () => {
-        const before = tasks.length;
-        tasks = tasks.filter(task => !task.done);
-        if (before !== tasks.length) { save(); render(); announce('완료한 일을 비웠어요.'); }
+      $('#clearAll').addEventListener('click', () => {
+        if (!notes.length) return; notes = []; save(); render(); announce('모든 메모를 지웠어요.');
       });
-      const now = new Date();
-      $('#todayDate').textContent = new Intl.DateTimeFormat('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'long' }).format(now);
-      $('#todayDate').dateTime = now.toISOString().slice(0, 10);
+      const now = new Date(); $('#todayDate').textContent = new Intl.DateTimeFormat('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'long' }).format(now); $('#todayDate').dateTime = now.toISOString().slice(0, 10);
       render();
     })();
   </script>
-  <div class="sr-only" id="announcement" aria-live="polite" aria-atomic="true"></div>
 </body>
 </html>
