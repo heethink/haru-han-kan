@@ -12,6 +12,8 @@ if (!configured) {
 } else {
   const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
   const loginAliasDomain = '@login.haru-han-kan.invalid';
+  const adminButton = $('#adminButton');
+  const adminPanel = $('#adminPanel');
   const input = $('#memoInput');
   const list = $('#notesList');
   const trashIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -60,6 +62,7 @@ if (!configured) {
       notesState = 'idle';
     }
     currentUser = nextUser;
+    adminButton.classList.toggle('hidden', currentUser?.app_metadata?.role !== 'admin');
     const appRoute = location.hash === '#/app';
     authScreen.classList.toggle('hidden', Boolean(currentUser && appRoute));
     protectedApp.classList.toggle('hidden', !(currentUser && appRoute));
@@ -102,6 +105,28 @@ if (!configured) {
     if (error) { announce(`삭제하지 못했어요: ${error.message}`); return; }
     notes = []; render(); announce('모든 메모를 지웠어요.');
   });
+  function renderAdminTable(container, headers, rows, classNames = []) {
+    container.replaceChildren();
+    const table = document.createElement('table'); table.className = 'admin-table';
+    const thead = document.createElement('thead'); const headRow = document.createElement('tr');
+    headers.forEach(label => { const th = document.createElement('th'); th.textContent = label; headRow.append(th); });
+    thead.append(headRow); table.append(thead);
+    const tbody = document.createElement('tbody');
+    if (!rows.length) { const row = document.createElement('tr'); const cell = document.createElement('td'); cell.colSpan = headers.length; cell.textContent = '표시할 자료가 없어요.'; row.append(cell); tbody.append(row); }
+    rows.forEach(values => { const row = document.createElement('tr'); values.forEach((value, index) => { const cell = document.createElement('td'); cell.textContent = value ?? ''; if (classNames[index]) cell.className = classNames[index]; row.append(cell); }); tbody.append(row); });
+    table.append(tbody); container.append(table);
+  }
+  function adminDate(value) { return value ? new Intl.DateTimeFormat('ko-KR', { dateStyle:'medium', timeStyle:'short' }).format(new Date(value)) : '기록 없음'; }
+  async function loadAdminOverview() {
+    const state = $('#adminState'); state.textContent = '관리자 자료를 불러오는 중입니다…';
+    const { data, error } = await supabase.functions.invoke('admin-overview');
+    if (error) { state.textContent = '관리자 자료를 불러오지 못했어요. 관리자 권한과 서버 설정을 확인해 주세요.'; return; }
+    renderAdminTable($('#memberTable'), ['로그인 아이디', '계정 생성 시각', '최근 로그인'], (data.members || []).map(member => [member.loginId, adminDate(member.createdAt), adminDate(member.lastSignInAt)]));
+    renderAdminTable($('#adminNotesTable'), ['로그인 아이디', '작성 시각', '메모'], (data.notes || []).map(note => [note.loginId, adminDate(note.createdAt), note.text]), ['', '', 'memo-content']);
+    state.textContent = `회원 ${data.members.length}명 · 메모 ${data.notes.length}개${data.notesLimitReached ? ' (최근 메모 1,000개 표시)' : ''}`;
+  }
+  adminButton.addEventListener('click', async () => { adminPanel.classList.remove('hidden'); await loadAdminOverview(); adminPanel.scrollIntoView({ behavior:'smooth', block:'start' }); });
+  $('#closeAdminButton').addEventListener('click', () => adminPanel.classList.add('hidden'));
   const now = new Date(); $('#todayDate').textContent = new Intl.DateTimeFormat('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'long' }).format(now); $('#todayDate').dateTime = now.toISOString().slice(0, 10);
   window.addEventListener('hashchange', async () => { const { data } = await supabase.auth.getSession(); await setSession(data.session); });
   supabase.auth.onAuthStateChange((_event, session) => { void setSession(session); });
