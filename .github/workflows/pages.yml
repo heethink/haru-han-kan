@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'outputs/index.html'
+      - 'outputs/app.js'
+      - 'outputs/supabase-config.js'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -29,7 +31,7 @@ jobs:
       - name: Prepare site
         run: |
           mkdir -p _site
-          cp outputs/index.html _site/index.html
+          cp outputs/index.html outputs/app.js outputs/supabase-config.js _site/
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload site files
