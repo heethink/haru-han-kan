@@ -1,23 +1,24 @@
-name: Deploy to GitHub Pages
+name: Publish one-line memo site
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'outputs/index.html'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: pages
+  group: github-pages
   cancel-in-progress: true
 
 jobs:
   deploy:
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -25,12 +26,16 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+      - name: Prepare site
+        run: |
+          mkdir -p _site
+          cp outputs/index.html _site/index.html
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-      - name: Upload website files
+      - name: Upload site files
         uses: actions/upload-pages-artifact@v4
         with:
-          path: outputs
-      - name: Deploy to GitHub Pages
+          path: _site
+      - name: Deploy site
         id: deployment
         uses: actions/deploy-pages@v4
