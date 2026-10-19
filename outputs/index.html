@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8f4">
+  <title>오늘의 할 일</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20251f;
+      --muted: #858c83;
+      --line: #e9ece5;
+      --paper: #fff;
+      --canvas: #f7f8f4;
+      --green: #527d5d;
+      --green-dark: #3d6247;
+      --green-pale: #edf4ed;
+      --orange: #e7a56c;
+      --shadow: 0 18px 50px rgba(38, 52, 38, .055);
+      font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--canvas); }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    .app { width: min(1080px, calc(100% - 48px)); margin: 0 auto; padding: 36px 0 60px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom: 42px; }
+    .brand { display:flex; align-items:center; gap:11px; font-size:17px; font-weight:750; letter-spacing:-.04em; }
+    .brand-mark { display:grid; place-items:center; width:34px; height:34px; color:#fff; background:var(--green); border-radius:11px; }
+    .brand-mark svg { width:19px; }
+    .top-date { color:var(--muted); font-size:13px; }
+    .layout { display:grid; grid-template-columns: 280px minmax(0, 1fr); gap:28px; align-items:start; }
+    .welcome { padding: 12px 4px 24px; }
+    .eyebrow { display:inline-flex; align-items:center; gap:8px; color:var(--green); background:var(--green-pale); border-radius:999px; padding:8px 12px; font-size:12px; font-weight:700; }
+    .eyebrow-dot { width:7px; height:7px; border-radius:50%; background:var(--green); }
+    h1 { margin:21px 0 9px; font-size:34px; line-height:1.24; letter-spacing:-.065em; }
+    .welcome p { margin:0; color:var(--muted); font-size:14px; line-height:1.7; }
+    .progress-card { margin-top:28px; padding:20px; background:var(--paper); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); }
+    .progress-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:17px; }
+    .progress-head strong { font-size:14px; }
+    .progress-head span { color:var(--green); font-size:13px; font-weight:750; }
+    .progress-track { height:8px; overflow:hidden; background:#eef0eb; border-radius:20px; }
+    .progress-fill { width:0; height:100%; background:linear-gradient(90deg, #79a580, var(--green)); border-radius:inherit; transition:width .25s ease; }
+    .progress-caption { margin-top:11px; color:var(--muted); font-size:12px; }
+    .side-note { display:flex; gap:12px; margin:20px 3px 0; color:#747d72; font-size:12px; line-height:1.65; }
+    .side-note .spark { color:var(--orange); font-size:16px; }
+    .main-card { overflow:hidden; background:var(--paper); border:1px solid var(--line); border-radius:22px; box-shadow:var(--shadow); }
+    .card-head { padding:25px 27px 20px; border-bottom:1px solid var(--line); }
+    .head-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    h2 { margin:0; font-size:20px; letter-spacing:-.045em; }
+    .count-pill { padding:6px 10px; color:var(--green); background:var(--green-pale); border-radius:999px; font-size:12px; font-weight:700; }
+    .filters { display:flex; gap:7px; margin-top:20px; }
+    .filter { padding:8px 12px; color:var(--muted); background:transparent; border:0; border-radius:9px; cursor:pointer; font-size:12px; font-weight:650; transition:.18s; }
+    .filter:hover { color:var(--ink); background:#f5f6f2; }
+    .filter[aria-pressed="true"] { color:var(--green-dark); background:var(--green-pale); }
+    .task-list { min-height:250px; padding:7px 27px 8px; }
+    .task-row { display:grid; grid-template-columns:22px minmax(0, 1fr) auto 30px; gap:13px; align-items:center; min-height:68px; border-bottom:1px solid #f0f1ed; animation:appear .2s ease-out; }
+    .task-row:last-child { border-bottom:0; }
+    @keyframes appear { from { opacity:0; transform:translateY(4px) } to { opacity:1; transform:none } }
+    .check { appearance:none; width:20px; height:20px; margin:0; border:1.5px solid #d8ded5; border-radius:7px; cursor:pointer; position:relative; transition:.16s; }
+    .check:hover { border-color:var(--green); }
+    .check:checked { border-color:var(--green); background:var(--green); }
+    .check:checked::after { content:""; position:absolute; left:5px; top:2px; width:6px; height:10px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+    .task-title { overflow-wrap:anywhere; font-size:14px; font-weight:570; line-height:1.45; }
+    .task-row.done .task-title { color:#a2a89f; text-decoration:line-through; }
+    .task-meta { display:flex; align-items:center; gap:7px; }
+    .tag { padding:5px 9px; color:#798078; background:#f3f4f1; border-radius:7px; font-size:11px; white-space:nowrap; }
+    .tag.work { color:#5877a3; background:#eef3fa; }
+    .tag.life { color:#ad7955; background:#fbf2ea; }
+    .tag.study { color:#8671a6; background:#f4f0f8; }
+    .delete { display:grid; place-items:center; width:30px; height:30px; color:#a4aaa1; background:transparent; border:0; border-radius:8px; cursor:pointer; opacity:.45; }
+    .delete:hover, .delete:focus-visible { color:#ba615a; background:#fbefee; opacity:1; }
+    .delete svg { width:16px; }
+    .empty { display:flex; min-height:250px; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:var(--muted); }
+    .empty-icon { display:grid; place-items:center; width:52px; height:52px; margin-bottom:13px; color:var(--green); background:var(--green-pale); border-radius:17px; }
+    .empty-icon svg { width:23px; }
+    .empty strong { color:#555e54; font-size:14px; }
+    .empty span { margin-top:6px; font-size:12px; }
+    .add-area { padding:18px 27px 23px; background:#fcfcfa; border-top:1px solid var(--line); }
+    .add-form { display:flex; gap:9px; }
+    .task-input { min-width:0; flex:1; height:46px; padding:0 14px; color:var(--ink); background:#fff; border:1px solid #e5e9e1; border-radius:11px; outline:none; font-size:13px; transition:.18s; }
+    .task-input::placeholder { color:#abb1a8; }
+    .task-input:focus { border-color:#91b295; box-shadow:0 0 0 3px rgba(82,125,93,.1); }
+    .category-select { width:102px; height:46px; padding:0 10px; color:#747d72; background:#fff; border:1px solid #e5e9e1; border-radius:11px; outline:none; font-size:12px; }
+    .add-button { display:flex; align-items:center; justify-content:center; gap:7px; min-width:88px; height:46px; padding:0 14px; color:#fff; background:var(--green); border:0; border-radius:11px; cursor:pointer; font-size:13px; font-weight:700; transition:.18s; }
+    .add-button:hover { background:var(--green-dark); transform:translateY(-1px); }
+    .add-button svg { width:16px; }
+    .hint { margin:10px 1px 0; color:#a1a79f; font-size:11px; }
+    .footer { display:flex; justify-content:space-between; margin-top:15px; color:#9ba198; font-size:11px; }
+    .footer button { padding:0; color:#9ba198; background:none; border:0; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+    .footer button:hover { color:#ba615a; }
+    :focus-visible { outline:3px solid rgba(82,125,93,.32); outline-offset:2px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    @media (max-width:740px) {
+      .app { width:min(560px, calc(100% - 30px)); padding-top:21px; }
+      .topbar { margin-bottom:25px; }
+      .layout { grid-template-columns:1fr; gap:18px; }
+      .welcome { padding:0 2px 0; }
+      h1 { margin-top:15px; font-size:29px; }
+      .progress-card { margin-top:17px; padding:16px 18px; }
+      .side-note { display:none; }
+      .main-card { border-radius:18px; }
+      .card-head { padding:21px 19px 16px; }
+      .task-list { padding:5px 19px; }
+      .task-row { grid-template-columns:22px minmax(0,1fr) auto 28px; gap:9px; }
+      .add-area { padding:15px 18px 19px; }
+    }
+    @media (max-width:430px) {
+      .top-date { font-size:11px; }
+      .task-row { grid-template-columns:22px minmax(0,1fr) 28px; }
+      .task-meta { display:none; }
+      .category-select { width:87px; }
+      .add-button { min-width:48px; padding:0 13px; }
+      .add-button span { display:none; }
+      .filters { gap:2px; }
+      .filter { padding:8px 10px; }
+    }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.3 4.3L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>하루 한 칸</div>
+      <time class="top-date" id="todayDate"></time>
+    </header>
+    <div class="layout">
+      <aside>
+        <section class="welcome" aria-labelledby="welcomeTitle">
+          <span class="eyebrow"><span class="eyebrow-dot"></span>나의 오늘</span>
+          <h1 id="welcomeTitle">작은 한 걸음이<br>하루를 바꿔요.</h1>
+          <p>오늘 할 일을 적고, 하나씩 체크해 보세요.<br>천천히 해도 괜찮아요.</p>
+        </section>
+        <section class="progress-card" aria-label="오늘의 진행 상황">
+          <div class="progress-head"><strong>오늘의 진행률</strong><span id="progressText">0%</span></div>
+          <div class="progress-track" role="progressbar" aria-label="할 일 완료율" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="progress-caption" id="progressCaption">할 일을 추가하고 시작해 보세요.</div>
+        </section>
+        <div class="side-note"><span class="spark" aria-hidden="true">✳</span><span>기억할 일을 적어 두면<br>마음이 조금 더 가벼워져요.</span></div>
+      </aside>
+      <main class="main-card" aria-labelledby="listTitle">
+        <div class="card-head">
+          <div class="head-row"><h2 id="listTitle">오늘 할 일</h2><span class="count-pill" id="countPill">0개 남음</span></div>
+          <nav class="filters" aria-label="할 일 필터">
+            <button class="filter" type="button" data-filter="all" aria-pressed="true">전체</button>
+            <button class="filter" type="button" data-filter="active" aria-pressed="false">할 일</button>
+            <button class="filter" type="button" data-filter="done" aria-pressed="false">완료</button>
+          </nav>
+        </div>
+        <div class="task-list" id="taskList" aria-live="polite"></div>
+        <div class="add-area">
+          <form class="add-form" id="addForm">
+            <label class="sr-only" for="taskInput">새 할 일</label>
+            <input class="task-input" id="taskInput" maxlength="120" placeholder="새로운 할 일을 적어보세요" autocomplete="off" required>
+            <label class="sr-only" for="categorySelect">분류</label>
+            <select class="category-select" id="categorySelect">
+              <option value="일상">일상</option><option value="업무">업무</option><option value="공부">공부</option>
+            </select>
+            <button class="add-button" type="submit"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>추가하기</span></button>
+          </form>
+          <p class="hint">Enter 키를 눌러도 할 일을 추가할 수 있어요.</p>
+        </div>
+      </main>
+    </div>
+    <div class="footer"><span>내 브라우저에 자동으로 저장돼요</span><button type="button" id="clearDone">완료한 일 비우기</button></div>
+  </div>
+  <script>
+    (() => {
+      const STORAGE_KEY = 'haru-han-kan-tasks-v1';
+      const $ = (selector) => document.querySelector(selector);
+      const list = $('#taskList');
+      const input = $('#taskInput');
+      const filters = [...document.querySelectorAll('.filter')];
+      const iconCheck = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.3 4.3L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const iconTrash = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      let tasks = loadTasks();
+      let currentFilter = 'all';
+
+      function loadTasks() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+          return Array.isArray(saved) ? saved.filter(t => t && typeof t.title === 'string' && typeof t.done === 'boolean') : [];
+        } catch { return []; }
+      }
+      function save() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
+        catch { announce('저장 공간이 부족해요.'); }
+      }
+      function announce(message) {
+        const live = $('#announcement');
+        live.textContent = '';
+        requestAnimationFrame(() => { live.textContent = message; });
+      }
+      function safeText(value) {
+        const span = document.createElement('span');
+        span.textContent = value;
+        return span.innerHTML;
+      }
+      function render() {
+        const remaining = tasks.filter(t => !t.done).length;
+        const completed = tasks.length - remaining;
+        const percent = tasks.length ? Math.round(completed / tasks.length * 100) : 0;
+        $('#countPill').textContent = `${remaining}개 남음`;
+        $('#progressText').textContent = `${percent}%`;
+        $('#progressFill').style.width = `${percent}%`;
+        $('#progressBar').setAttribute('aria-valuenow', String(percent));
+        $('#progressCaption').textContent = tasks.length ? `${completed}개 완료 · ${remaining}개 남았어요` : '할 일을 추가하고 시작해 보세요.';
+        const visible = tasks.filter(task => currentFilter === 'all' || (currentFilter === 'active' ? !task.done : task.done));
+        if (!visible.length) {
+          const allEmpty = tasks.length === 0;
+          list.innerHTML = `<div class="empty"><span class="empty-icon">${iconCheck}</span><strong>${allEmpty ? '오늘은 무엇을 해볼까요?' : currentFilter === 'active' ? '남은 할 일이 없어요!' : '아직 완료한 일이 없어요.'}</strong><span>${allEmpty ? '아래에 첫 번째 할 일을 적어보세요.' : '다른 탭에서 목록을 확인해 보세요.'}</span></div>`;
+          return;
+        }
+        list.innerHTML = visible.map(task => `<article class="task-row ${task.done ? 'done' : ''}" data-id="${safeText(task.id)}">
+          <input class="check" type="checkbox" aria-label="${task.done ? '완료 취소' : '완료 표시'}: ${safeText(task.title)}" ${task.done ? 'checked' : ''}>
+          <span class="task-title">${safeText(task.title)}</span>
+          <div class="task-meta"><span class="tag ${task.category === '업무' ? 'work' : task.category === '공부' ? 'study' : 'life'}">${safeText(task.category || '일상')}</span></div>
+          <button class="delete" type="button" aria-label="삭제: ${safeText(task.title)}">${iconTrash}</button>
+        </article>`).join('');
+      }
+      $('#addForm').addEventListener('submit', event => {
+        event.preventDefault();
+        const title = input.value.trim();
+        if (!title) { input.focus(); return; }
+        tasks.unshift({ id: (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`), title, category: $('#categorySelect').value, done: false });
+        save(); render(); input.value = ''; input.focus(); announce('할 일을 추가했어요.');
+      });
+      list.addEventListener('change', event => {
+        if (!event.target.matches('.check')) return;
+        const row = event.target.closest('[data-id]');
+        const task = tasks.find(item => item.id === row.dataset.id);
+        if (task) { task.done = event.target.checked; save(); render(); announce(task.done ? '완료로 표시했어요.' : '완료 표시를 취소했어요.'); }
+      });
+      list.addEventListener('click', event => {
+        const button = event.target.closest('.delete');
+        if (!button) return;
+        const row = button.closest('[data-id]');
+        const task = tasks.find(item => item.id === row.dataset.id);
+        tasks = tasks.filter(item => item.id !== row.dataset.id);
+        save(); render(); announce(`할 일을 삭제했어요${task ? `: ${task.title}` : ''}.`);
+      });
+      filters.forEach(button => button.addEventListener('click', () => {
+        currentFilter = button.dataset.filter;
+        filters.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        render();
+      }));
+      $('#clearDone').addEventListener('click', () => {
+        const before = tasks.length;
+        tasks = tasks.filter(task => !task.done);
+        if (before !== tasks.length) { save(); render(); announce('완료한 일을 비웠어요.'); }
+      });
+      const now = new Date();
+      $('#todayDate').textContent = new Intl.DateTimeFormat('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'long' }).format(now);
+      $('#todayDate').dateTime = now.toISOString().slice(0, 10);
+      render();
+    })();
+  </script>
+  <div class="sr-only" id="announcement" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>
