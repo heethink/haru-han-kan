@@ -11,6 +11,7 @@ if (!configured) {
   authMessage.textContent = 'supabase-config.js에 프로젝트 URL과 publishable key를 입력해 주세요.';
 } else {
   const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  const loginAliasDomain = '@login.haru-han-kan.invalid';
   const input = $('#memoInput');
   const list = $('#notesList');
   const trashIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -67,20 +68,19 @@ if (!configured) {
     if (currentUser && location.hash !== '#/app') location.hash = '/app';
   }
   $('#authForm').addEventListener('submit', async event => {
-    event.preventDefault(); authMessage.textContent = '로그인 중입니다…';
-    const { error } = await supabase.auth.signInWithPassword({ email: $('#authEmail').value, password: $('#authPassword').value });
-    authMessage.textContent = error ? error.message : '로그인되었습니다.';
-  });
-  $('#signUpButton').addEventListener('click', async () => {
-    // This is a type="button", so native required/type/minlength checks do not run automatically.
-    if (!$('#authForm').reportValidity()) return;
-    authMessage.textContent = '회원가입 중입니다…';
-    const { data, error } = await supabase.auth.signUp({
-      email: $('#authEmail').value.trim(),
-      password: $('#authPassword').value,
-      options: { emailRedirectTo: `${window.location.origin}${window.location.pathname}` }
-    });
-    authMessage.textContent = error ? error.message : data.session ? '가입되었습니다.' : '이메일 인증 링크를 확인한 뒤 로그인해 주세요.';
+    event.preventDefault();
+    const identifier = $('#authEmail').value.trim();
+    let email = identifier;
+    if (!identifier.includes('@')) {
+      if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{2,31}$/.test(identifier)) {
+        authMessage.textContent = '아이디는 영문, 숫자, 점, 밑줄, 하이픈을 사용해 3~32자로 입력해 주세요.';
+        return;
+      }
+      email = `${identifier.toLowerCase()}${loginAliasDomain}`;
+    }
+    authMessage.textContent = '로그인 중입니다…';
+    const { error } = await supabase.auth.signInWithPassword({ email, password: $('#authPassword').value });
+    authMessage.textContent = error ? '아이디 또는 비밀번호를 확인해 주세요.' : '로그인되었습니다.';
   });
   $('#signOutButton').addEventListener('click', async () => { const { error } = await supabase.auth.signOut(); if (error) announce(`로그아웃하지 못했어요: ${error.message}`); });
   $('#memoForm').addEventListener('submit', async event => {

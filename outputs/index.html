@@ -14,8 +14,8 @@
 <body>
   <section class="auth-shell hidden" id="authScreen" aria-labelledby="authTitle">
     <div class="brand"><span class="brand-mark" aria-hidden="true">한</span>한 줄 메모</div>
-    <h1 id="authTitle">로그인하고 메모를 이어가세요.</h1><p>메모는 로그인한 계정에 저장됩니다.</p>
-    <form class="auth-form" id="authForm"><label for="authEmail">이메일</label><input id="authEmail" type="email" autocomplete="email" required><label for="authPassword">비밀번호</label><input id="authPassword" type="password" autocomplete="current-password" minlength="8" required><div class="auth-actions"><button type="submit">로그인</button><button class="secondary" type="button" id="signUpButton">회원가입</button></div></form>
+    <h1 id="authTitle">아이디로 로그인하세요.</h1><p>관리자가 발급한 아이디와 비밀번호를 입력해 주세요. 기존 이메일 계정도 계속 사용할 수 있어요.</p>
+    <form class="auth-form" id="authForm"><label for="authEmail">로그인 아이디 또는 이메일</label><input id="authEmail" type="text" autocomplete="username" placeholder="관리자에게 받은 아이디" required><label for="authPassword">비밀번호</label><input id="authPassword" type="password" autocomplete="current-password" required><div class="auth-actions"><button type="submit">로그인</button></div></form>
     <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
   </section>
   <div class="app hidden" id="protectedApp">
