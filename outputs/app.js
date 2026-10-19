@@ -72,6 +72,8 @@ if (!configured) {
     authMessage.textContent = error ? error.message : '로그인되었습니다.';
   });
   $('#signUpButton').addEventListener('click', async () => {
+    // This is a type="button", so native required/type/minlength checks do not run automatically.
+    if (!$('#authForm').reportValidity()) return;
     authMessage.textContent = '회원가입 중입니다…';
     const { data, error } = await supabase.auth.signUp({
       email: $('#authEmail').value.trim(),
